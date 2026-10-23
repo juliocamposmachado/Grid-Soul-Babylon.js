@@ -1,0 +1,86 @@
+# ==============================
+# GRID SOUL — GITIGNORE
+# ==============================
+
+# Dependências
+node_modules/
+vendor/
+.venv/
+venv/
+env/
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.pem
+*.key
+secrets/
+credentials/
+credentials.json
+service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# JavaScript / TypeScript
+.npm/
+*.tsbuildinfo
+.eslintcache
+
+# Builds e artefatos gerados
+dist/
+build/
+out/
+coverage/
+*.log
+logs/
+tmp/
+temp/
+
+# Editores e sistema operacional
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Cache e arquivos temporários
+.cache/
+.parcel-cache/
+.turbo/
+*.tmp
+*.bak
+*.old
+
+# Bancos de dados locais
+*.sqlite
+*.sqlite3
+*.db
+
+# Certificados e chaves
+*.crt
+*.p12
+*.pfx
+
+# Git: não ignorar o próprio repositório
+!.gitignore
+
+# Dados locais e perfis autenticados
+.chatgpt-profile/
+data/gridsoul-memory.json
+data/gridsoul-memory.json.tmp
+data/automation/
+data/vision-projects/

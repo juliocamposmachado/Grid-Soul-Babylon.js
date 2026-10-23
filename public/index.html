@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GRID SOUL — Entidade Cognitiva</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#020711;color:#e6faff;font:14px system-ui}
+header{padding:15px 20px;border-bottom:1px solid #16374b}
+h1{font-size:19px;letter-spacing:4px;color:#48f5ff;margin:0}
+header p{color:#87a9bd;margin:5px 0 0}
+main{display:grid;grid-template-columns:minmax(0,1fr) 310px;height:calc(100vh - 65px);min-height:620px}
+#stage{position:relative;min-height:620px;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+#primaryCanvas{position:absolute;inset:0;touch-action:none}
+#renderMetrics{position:absolute;z-index:2;right:10px;top:10px;max-width:calc(100% - 20px);padding:5px 8px;border:1px solid #1b526477;border-radius:6px;background:#020711cc;color:#95d9e8;font:10px ui-monospace,monospace;pointer-events:none}
+#fitViewButton{position:absolute;z-index:3;right:12px;bottom:10px;width:auto;padding:7px 11px;border-color:#35c6d8;background:#06394b;color:#dffcff;font-size:11px}
+#hint{position:absolute;z-index:2;bottom:12px;left:14px;color:#86b8ca;pointer-events:none}
+aside{background:#081422;border-left:1px solid #16374b;padding:18px;overflow:auto;min-height:0}
+h2{font-size:12px;letter-spacing:2px;color:#48f5ff}
+textarea{width:100%;resize:vertical;background:#030b16;color:#e6faff;border:1px solid #24536a;border-radius:7px;padding:10px}
+button{width:100%;padding:11px;border:1px solid #23677e;border-radius:7px;background:#07536a;color:white;cursor:pointer;font-weight:700}
+button:disabled{opacity:.5}
+#openShowcase{margin-top:8px;background:#092636;border-color:#268094}
+label{display:block;margin:16px 0 6px;color:#9bb9ca;font-size:12px}
+input{width:100%;accent-color:#48f5ff}
+small,#reply{color:#9bb9ca;line-height:1.7;overflow-wrap:anywhere}
+small,#reply{color:#9bb9ca;line-height:1.7;overflow-wrap:anywhere}
+#reply{white-space:pre-wrap;max-height:180px;overflow:auto}
+.stats{margin-top:20px;padding-top:15px;border-top:1px solid #1b3548}
+select{width:100%;padding:9px;background:#030b16;color:#e6faff;border:1px solid #24536a;border-radius:6px}
+#chemistry-tools{margin-top:18px;padding-top:14px;border-top:1px solid #1b3548}
+#chemistry-tools details{margin-top:10px}
+#chemistry-tools summary{color:#8eefff;cursor:pointer;font-weight:700}
+.periodic-wrap{max-width:100%;padding:5px 0 10px}
+.periodic-grid{display:grid;grid-template-columns:repeat(18,minmax(0,1fr));grid-auto-rows:30px;gap:2px;width:100%}
+.element-chip{width:100%;height:30px;min-width:0;padding:0;border:1px solid var(--element-color);border-radius:3px;background:linear-gradient(155deg,color-mix(in srgb,var(--element-color) 55%,#061522),#061522 82%);color:#f5fbff;text-shadow:0 1px 2px #000;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.element-chip strong{font-size:9px;letter-spacing:-.4px}
+.element-chip span{font-size:7px;color:#d3e5ef}
+.element-chip[aria-pressed="true"]{outline:2px solid #fff;outline-offset:1px;z-index:1}
+#focusNotice{display:block;margin:7px 0;color:#c6dce8}
+#clearElementFocus{margin-top:8px;padding:8px;font-size:11px}
+#automationToggle{margin-top:8px;background:#063b4c;border-color:#35d8ee}
+#automationPanel[hidden]{display:none!important}
+#automationPanel{position:fixed;z-index:10;right:12px;top:76px;width:min(470px,calc(100vw - 24px));max-height:calc(100vh - 90px);overflow:auto;padding:16px;background:#06111ff5;border:1px solid #1d6177;border-radius:12px;box-shadow:0 12px 50px #000b;backdrop-filter:blur(14px)}
+.auto-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #1b3548;padding-bottom:10px}
+.auto-head h2{margin:0}.auto-head button{width:auto;padding:6px 10px}
+.auto-warning{margin:10px 0;padding:9px;border:1px solid #745b26;border-radius:7px;background:#32270f;color:#f4dda2;font-size:12px;line-height:1.5}
+.auto-section{border-top:1px solid #1b3548;padding:9px 0}.auto-section h3{font-size:11px;letter-spacing:1px;color:#48f5ff;margin:3px 0 8px}
+.auto-section label{margin:8px 0 4px}.auto-section input[type=text],.auto-section input[type=url],.auto-section textarea,.auto-section select{width:100%;padding:8px;background:#030b16;color:#e6faff;border:1px solid #24536a;border-radius:6px;font:inherit}
+.auto-section textarea{resize:vertical}.auto-inline{display:flex;gap:7px;margin-top:7px}.auto-inline>*{flex:1;min-width:0}.auto-inline button{padding:8px;font-size:12px}
+.auto-permission{display:flex;align-items:flex-start;gap:8px;margin:8px 0;color:#c6dce8;font-size:12px}.auto-permission input{width:auto;margin-top:3px}
+.auto-scopes{list-style:none;margin:5px 0;padding:0}.auto-scopes li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;border-top:1px solid #13283a;font-size:11px;overflow-wrap:anywhere}.auto-scopes button{width:auto;padding:4px 7px;font-size:10px;background:#33202a;border-color:#714350}
+.auto-note{display:block;margin:6px 0;color:#87a9bd;font-size:11px;line-height:1.5}.auto-command{font-family:ui-monospace,SFMono-Regular,monospace!important}
+#autoTaskList,#autoAudit{display:grid;gap:8px}.auto-task{padding:8px;border:1px solid #23485d;border-radius:7px;background:#071827;font-size:12px}.auto-task pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:180px;overflow:auto;color:#b8d5e1;font:11px ui-monospace,monospace;margin:7px 0}.auto-task strong{color:#d9faff}.auto-task small{display:block}.auto-task .auto-inline button{font-size:11px}
+.auto-review{display:flex;align-items:flex-start;gap:7px;margin:8px 0;color:#f2d78d;font-size:11px}.auto-review input{width:auto;margin-top:2px}
+.auto-stop{background:#672b39;border-color:#ad5265}.auto-audit-item{font:10px ui-monospace,monospace;color:#9bb9ca;border-bottom:1px solid #183247;padding:4px 0}
+#forgeToggle{margin-top:8px;background:#133e3d;border-color:#48f5ff;color:#eaffff}
+#forgePanel[hidden]{display:none!important}
+#forgePanel{position:fixed;z-index:11;right:12px;top:76px;width:min(660px,calc(100vw - 24px));max-height:calc(100vh - 90px);overflow:auto;padding:16px;background:#06111ff5;border:1px solid #48f5ff66;border-radius:12px;box-shadow:0 12px 50px #000c;backdrop-filter:blur(14px)}
+.forge-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #1b3548;padding-bottom:10px}.forge-head h2{margin:0;letter-spacing:2px}.forge-head button{width:auto;padding:6px 10px}
+.forge-kicker{display:block;color:#76dce8;font:10px ui-monospace,monospace;letter-spacing:1px}.forge-warning{margin:10px 0;padding:9px;border:1px solid #745b26;border-radius:7px;background:#32270f;color:#f4dda2;font-size:12px;line-height:1.5}
+.forge-section{border-top:1px solid #1b3548;padding:11px 0}.forge-section h3,.forge-section summary{font-size:11px;letter-spacing:1px;color:#48f5ff;margin:3px 0 8px}.forge-section summary{cursor:pointer}.forge-section label{margin:8px 0 4px}.forge-section input[type=text],.forge-section textarea,.forge-section select,.forge-param{width:100%;padding:8px;background:#030b16;color:#e6faff;border:1px solid #24536a;border-radius:6px;font:inherit}.forge-section textarea{resize:vertical}.forge-row{display:flex;gap:8px;margin-top:8px}.forge-row>*{flex:1;min-width:0}.forge-row button{padding:9px;font-size:12px}.forge-consent{display:flex;gap:8px;align-items:flex-start;margin:10px 0;color:#c9e6ed;font-size:11px;line-height:1.5}.forge-consent input{width:auto;margin-top:3px}.forge-consent label{margin:0}.forge-param-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.forge-param-grid label{margin:4px 0;font-size:10px}.forge-viewport{height:320px;position:relative;background:radial-gradient(ellipse at center,#102a39,#030912 70%);border:1px solid #1b5264;border-radius:9px;overflow:hidden}.forge-viewport canvas{width:100%;height:100%;touch-action:none}.forge-controls{display:flex;gap:6px;margin-top:7px}.forge-controls button{padding:8px;font-size:11px}.forge-status{padding:8px;border-radius:6px;background:#071827;color:#b9d8e1;font-size:11px;line-height:1.55;white-space:pre-wrap}.forge-status[data-state="error"]{border:1px solid #ad5265;color:#ffd6dc}.forge-status[data-state="ok"]{border:1px solid #328878;color:#c9ffef}.forge-material{font-size:11px;line-height:1.6;color:#bed5df}.forge-material a{color:#64e9ff}.forge-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}.forge-metric{padding:8px;background:#071827;border:1px solid #18384a;border-radius:6px}.forge-metric strong{display:block;color:#48f5ff;font:12px ui-monospace,monospace}.forge-metric span{font-size:10px;color:#9bb9ca}.forge-export{background:#07536a}.forge-export:disabled{background:#26313a}.forge-muted{color:#92afbd;font-size:10px;line-height:1.5}.forge-checks{margin:5px 0;padding-left:17px;color:#b8d6df;font-size:11px;line-height:1.6}
+@media(max-width:760px){main{grid-template-columns:1fr;height:auto;min-height:0}#stage{height:55vh;min-height:390px}aside{border:0;overflow:visible}}
+@media(max-width:560px){#forgePanel{right:6px;top:70px;width:calc(100vw - 12px);max-height:calc(100vh - 78px);padding:11px}.forge-param-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.forge-viewport{height:270px}.forge-controls{flex-wrap:wrap}.forge-controls button{flex:1 1 30%}}
+</style>
+<style>
+.vision-panel[hidden]{display:none!important}.vision-panel{position:fixed;z-index:12;inset:12px;overflow:auto;padding:16px;background:#04101df8;border:1px solid #48f5ff88;border-radius:13px;box-shadow:0 12px 60px #000d;backdrop-filter:blur(15px)}
+.vision-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #1b3548;padding-bottom:10px}.vision-head h2{margin:0;letter-spacing:1px}.vision-head button{width:auto;padding:7px 12px}.vision-intro,.vision-note{color:#aac3d0;font-size:11px;line-height:1.55}.vision-warning{padding:9px;border:1px solid #745b26;border-radius:7px;background:#32270f;color:#f4dda2;font-size:11px;line-height:1.55}.vision-grid{display:grid;grid-template-columns:minmax(280px,1fr) minmax(320px,1fr);gap:14px}.vision-card{min-width:0;padding:12px;margin-top:10px;background:#071522;border:1px solid #18384a;border-radius:9px}.vision-card h3{margin:0 0 9px;font-size:11px;letter-spacing:1px;color:#48f5ff}.vision-image-frame{position:relative;width:100%;max-height:420px;overflow:hidden;background:#020711;border:1px solid #21465a;border-radius:7px;display:flex;align-items:center;justify-content:center}.vision-image-frame>img{display:block;width:100%;max-height:420px;object-fit:contain}.vision-image-frame .vision-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}.vision-image-frame canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}.vision-image-frame canvas[data-drawing="false"]{pointer-events:none}.vision-upload{display:flex;align-items:center;justify-content:center;min-height:75px;padding:12px;border:1px dashed #48f5ff66;border-radius:7px;color:#aad6e3;text-align:center}.vision-upload.dragover{background:#0a2a3a;border-color:#48f5ff}.vision-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.vision-controls label{margin:2px 0;font-size:10px}.vision-controls input,.vision-controls select{width:100%;padding:7px;background:#030b16;color:#e6faff;border:1px solid #24536a;border-radius:6px;font:inherit}.vision-controls input[type=checkbox]{width:auto}.vision-controls input[type=range]{padding:0}.vision-controls input[type=color]{height:32px;padding:2px}.vision-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.vision-row>*{flex:1 1 140px;min-width:0}.vision-row button{padding:9px;font-size:11px}.vision-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.vision-toolbar label{margin:0;font-size:9px}.vision-toolbar input,.vision-toolbar select{width:100%;padding:6px;background:#030b16;color:#e6faff;border:1px solid #24536a;border-radius:5px;font-size:11px}.vision-status{min-height:30px;padding:8px;background:#06111f;border:1px solid #17364a;border-radius:6px;color:#b8d6df;font-size:11px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.vision-status[data-state="error"]{border-color:#ad5265;color:#ffd6dc}.vision-status[data-state="ok"]{border-color:#328878;color:#c9ffef}.vision-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:8px}.vision-metrics div{padding:7px;background:#06111f;border:1px solid #17364a;border-radius:5px}.vision-metrics strong{display:block;color:#48f5ff;font:11px ui-monospace,monospace}.vision-metrics span{font-size:9px;color:#9bb9ca}.vision-swatches{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.vision-swatch{width:20px;height:20px;border:1px solid #d4eef4;border-radius:50%}.vision-viewport{height:380px;position:relative;background:#020711;border:1px solid #1b5264;border-radius:8px;overflow:hidden}.vision-viewport canvas{display:block;width:100%;height:100%;touch-action:none}.vision-comparison{display:grid;grid-template-columns:1fr 1fr;gap:8px}.vision-comparison img{width:100%;max-height:220px;object-fit:contain;background:#020711;border:1px solid #21465a;border-radius:6px}.vision-layers{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0;color:#b8d6df;font-size:10px}.vision-layers label{display:flex;align-items:center;gap:4px;margin:0}.vision-layers input{width:auto}.vision-danger{background:#542937;border-color:#975064}
+@media(max-width:800px){.vision-panel{inset:5px;padding:10px}.vision-grid{grid-template-columns:1fr}.vision-viewport{height:300px}}
+</style>
+</head>
+<body>
+<header>
+<h1>GRID SOUL</h1>
+<p>CHATGPT É O CÉREBRO · O ENXAME É O CORPO</p>
+</header>
+<main>
+<section id="stage">
+<canvas id="primaryCanvas" aria-label="Enxame GRID SOUL renderizado em Babylon.js"></canvas>
+<div id="renderMetrics" role="status" aria-live="off">Inicializando Babylon.js...</div>
+<button id="fitViewButton" type="button" title="Enquadrar todos os microcubos na cena">Enquadrar modelo</button>
+<div id="hint">Arraste para observar · Scroll para aproximar</div>
+</section>
+<aside>
+<h2>COMUNICAR COM A ENTIDADE</h2>
+<textarea id="command" rows="4" maxlength="1200"
+placeholder="Ex.: transforme-se em uma espiral, expanda e gire para a direita."></textarea>
+<button id="send" style="margin-top:9px">Enviar ao ChatGPT</button>
+<button id="openShowcase" type="button">Abrir demonstração química</button>
+<button id="automationToggle" type="button" aria-expanded="false" aria-controls="automationPanel">Abrir agente de automação local</button>
+<button id="forgeToggle" type="button" aria-expanded="false" aria-controls="forgePanel">Abrir Atomic Forge 3D</button>
+<button id="visionToggle" type="button" aria-expanded="false" aria-controls="visionPanel">Abrir Laboratório de Visão Computacional</button>
+<div id="reply" aria-live="polite">Inicializando a entidade...</div>
+
+<label>População de microcubos <output id="popout">2000</output></label>
+<input id="population" type="range" min="1000" max="500000"
+step="1000" value="2000">
+
+<label>Energia coletiva <output id="energyout">0.60</output></label>
+<input id="energy" type="range" min="0" max="1" step=".05" value=".6">
+<label>Tamanho dos microcubos <output id="cubesizeout">1,00×</output></label>
+<input id="cubeSize" type="range" min="0.35" max="2.5" step="0.05" value="1">
+
+<section id="chemistry-tools" aria-labelledby="chemistry-heading">
+<h2 id="chemistry-heading">IDENTIDADE QUÍMICA · 118 ELEMENTOS</h2>
+<label for="paletteMode">Cores dos microcubos</label>
+<select id="paletteMode">
+<option value="chemical">Identidade química (padrão)</option>
+<option value="single">Cor única</option>
+<option value="rainbow">Arco-íris</option>
+<option value="plasma">Plasma</option>
+<option value="fire">Fogo</option>
+<option value="green">Verde</option>
+<option value="cyan">Ciano / azul</option>
+<option value="face">Rosto — cores da referência</option>
+</select>
+<small id="focusNotice" aria-live="polite">Cada slot conserva seu número atômico ao mudar a forma.</small>
+<details open>
+<summary>Explorar / destacar um elemento</summary>
+<div class="periodic-wrap"><div id="elementCatalog" class="periodic-grid" role="grid" aria-label="Catálogo dos 118 elementos químicos"></div></div>
+<button id="clearElementFocus" type="button">Mostrar todos os elementos</button>
+</details>
+</section>
+
+<div class="stats">
+<h2>ESTADO DA ENTIDADE</h2>
+<small id="state">Iniciando motor 3D...</small>
+<p><small>O limite de população representa a capacidade configurada, não um limite geométrico fixo. Aumente-o conforme o desempenho disponível.</small></p>
+</div>
+</aside>
+</main>
+<section id="automationPanel" role="dialog" aria-label="Agente de automação local" hidden>
+  <div class="auto-head"><h2>AGENTE LOCAL · CONTROLES</h2><button id="automationClose" type="button" aria-label="Fechar painel">Fechar</button></div>
+  <p class="auto-warning">Acesso desativado por padrão. Autorize cada categoria e escopo. Cada navegação, leitura de texto, preenchimento, clique e mutação de arquivo pede aprovação própria. Dados e auditoria permanecem neste computador.</p>
+  <section class="auto-section"><h3>PERMISSÕES E ESCOPO</h3><div id="autoPermissions"></div>
+    <label for="autoRoot">Pasta específica para arquivos e comandos de arquivo</label><input id="autoRoot" type="text" placeholder="Ex.: /home/usuario/Documentos">
+    <button id="autoGrantRoot" type="button">Autorizar esta pasta</button><ul id="autoRoots" class="auto-scopes"></ul>
+    <label for="autoOrigin">Origem HTTPS exata para Playwright</label><input id="autoOrigin" type="url" placeholder="https://gemini.google.com">
+    <button id="autoGrantOrigin" type="button">Autorizar esta origem</button><ul id="autoOrigins" class="auto-scopes"></ul>
+    <small class="auto-note" id="autoBrowserMode"></small>
+  </section>
+  <details class="auto-section" open><summary>TERMINAL INTEGRADO</summary><small class="auto-note">CLI sem shell arbitrário: pwd, date, whoami, uname, ls, cat, head, tail, grep literal, git status/log/diff --stat e consultas de versão. Comandos de arquivo ficam restritos às pastas Files; consultas básicas de ambiente usam o processo local. Saída máxima: 20 KiB. O terminal nativo inicia na raiz Files concedida ou na pasta do projeto e fica fora dos filtros.</small>
+    <label for="autoCommand">Comando permitido</label><input id="autoCommand" class="auto-command" type="text" placeholder="Ex.: ls -la">
+    <div class="auto-inline"><button id="autoRunCommand" type="button">Executar</button><button id="autoOpenTerminal" type="button">Abrir terminal nativo</button></div>
+  </details>
+  <details class="auto-section"><summary>ARQUIVOS</summary><small class="auto-note">Leituras e escritas de texto têm limite de 256 KiB. Operações de criação, atualização, movimentação e exclusão aguardam aprovação.</small>
+    <label for="autoFileAction">Operação</label><select id="autoFileAction"><option value="list">Listar pasta</option><option value="read">Ler texto</option><option value="create">Criar arquivo</option><option value="write">Atualizar arquivo</option><option value="mkdir">Criar pasta</option><option value="rename">Mover/renomear</option><option value="delete">Excluir arquivo</option></select>
+    <label for="autoFilePath">Caminho (relativo à pasta concedida ou absoluto dentro dela)</label><input id="autoFilePath" type="text" placeholder="notas.txt">
+    <label for="autoFileDestination">Destino (para mover/renomear)</label><input id="autoFileDestination" type="text" placeholder="notas-antigas.txt">
+    <label for="autoFileContent">Conteúdo (para criar/atualizar)</label><textarea id="autoFileContent" rows="3" maxlength="262144" placeholder="Texto a gravar após aprovação explícita"></textarea>
+    <button id="autoFileSubmit" type="button">Executar operação</button>
+  </details>
+  <details class="auto-section"><summary>NAVEGADOR PLAYWRIGHT ISOLADO</summary>
+    <small class="auto-note">Contexto temporário sem importar cookies/perfis existentes e sem ler credenciais armazenadas. “Ler texto visível” pode mostrar dados pessoais ou credenciais já exibidos e exige aprovação; o texto fica em memória/API por até 60 s e não entra na auditoria. Navegação GET pode ter efeitos remotos e exige aprovação por URL. Nunca preenche campos de senha/arquivo ou identificadores sensíveis. Login é manual com GRID_SOUL_AUTOMATION_HEADLESS=0; cada origem deve ser autorizada. Texto da página: até 5.000 caracteres.</small>
+    <label for="autoUrl">URL HTTPS de navegação</label><input id="autoUrl" type="url" placeholder="https://chatgpt.com/">
+    <button id="autoNavigate" type="button">Abrir página autorizada</button>
+    <div class="auto-inline"><button id="autoReadPage" type="button">Ler texto visível</button><button id="autoCloseBrowser" type="button">Fechar navegador</button></div>
+    <label for="autoField">Campo acessível/placeholder</label><input id="autoField" type="text" placeholder="Pesquisar">
+    <label for="autoValue">Texto para preencher (sempre pede aprovação)</label><textarea id="autoValue" rows="2" maxlength="5000"></textarea>
+    <button id="autoFill" type="button">Preencher campo</button>
+    <label for="autoClickRole">Controle do clique</label><select id="autoClickRole"><option value="button">Botão</option><option value="link">Link</option></select>
+    <input id="autoClickTarget" type="text" placeholder="Nome acessível exato">
+    <button id="autoClick" type="button">Solicitar clique (aprovação obrigatória)</button>
+  </details>
+  <details class="auto-section"><summary>INICIAR PROGRAMA</summary><div class="auto-inline"><button type="button" data-auto-app="browser">Navegador (GRID SOUL)</button><button type="button" data-auto-app="calculator">Calculadora</button><button type="button" data-auto-app="textEditor">Editor</button></div></details>
+  <section class="auto-section"><h3>TAREFAS · APROVAÇÃO · SAÍDA</h3><button id="autoStopAll" class="auto-stop" type="button">INTERROMPER TUDO AGORA</button><div id="autoTaskList" aria-live="polite"></div></section>
+  <details class="auto-section"><summary>AUDITORIA (metadados mínimos)</summary><div id="autoAudit"></div></details>
+</section>
+<section id="forgePanel" role="dialog" aria-label="Atomic Forge 3D — oficina de geometria" hidden>
+  <div class="forge-head"><div><span class="forge-kicker">GRID SOUL · OFICINA LOCAL · MILÍMETROS</span><h2>ATOMIC FORGE 3D</h2></div><button id="forgeClose" type="button" aria-label="Fechar oficina">Fechar</button></div>
+  <p class="forge-warning">Protótipo v1: gera somente um garfo paramétrico. Volume e malha referem-se ao CAD construído; massa é uma estimativa teórica a 100% sólido. Não há FEM, validação alimentar, slicer, impressão física, 3MF nem STEP nesta fatia.</p>
+  <section class="forge-section" aria-labelledby="forge-spec-heading">
+    <h3 id="forge-spec-heading">REQUISITOS E PROPOSTA</h3>
+    <label for="forgeProjectName">Nome do projeto</label><input id="forgeProjectName" type="text" maxlength="80" value="Garfo paramétrico">
+    <label for="forgeDescription">Descreva o objeto e o uso pretendido</label><textarea id="forgeDescription" rows="2" maxlength="1200" placeholder="Ex.: garfo de 190 mm, quatro dentes, para protótipo decorativo"></textarea>
+    <label for="forgePurpose">Uso informado</label><select id="forgePurpose"><option value="prototype">Protótipo não alimentar</option><option value="decorative">Decorativo</option><option value="food-contact">Contato com alimentos (não certificado)</option></select>
+    <div class="forge-consent"><input id="forgeUseAI" type="checkbox"><label for="forgeUseAI">Opcional: pedir uma proposta ao ChatGPT pela ponte existente. A descrição e as dimensões visíveis só serão enviadas após confirmação explícita; nenhum arquivo, pasta ou credencial é anexado.</label></div>
+    <button id="forgeAnalyze" type="button">Analisar descrição localmente</button>
+    <div id="forgeQuestions" class="forge-status" role="status" aria-live="polite">Ajuste os parâmetros ou peça uma proposta. A análise local funciona sem enviar dados.</div>
+  </section>
+  <details class="forge-section" open><summary>PARÂMETROS GEOMÉTRICOS · EDITÁVEIS</summary>
+    <div class="forge-param-grid">
+      <label>Comprimento total · mm<input class="forge-param" data-fork-key="lengthMm" type="number" min="90" max="350" step="1" value="190"></label>
+      <label>Número de pontas<input class="forge-param" data-fork-key="tineCount" type="number" min="2" max="6" step="1" value="4"></label>
+      <label>Comprimento das pontas · mm<input class="forge-param" data-fork-key="tineLengthMm" type="number" min="20" max="80" step="0.5" value="40"></label>
+      <label>Largura de cada ponta · mm<input class="forge-param" data-fork-key="tineWidthMm" type="number" min="1.5" max="5" step="0.1" value="3.2"></label>
+      <label>Vão entre pontas · mm<input class="forge-param" data-fork-key="tineGapMm" type="number" min="1.2" max="5" step="0.1" value="2"></label>
+      <label>Pescoço · mm<input class="forge-param" data-fork-key="neckLengthMm" type="number" min="8" max="25" step="0.5" value="16"></label>
+      <label>Largura do cabo · mm<input class="forge-param" data-fork-key="handleWidthMm" type="number" min="6" max="30" step="0.5" value="13"></label>
+      <label>Largura da extremidade · mm<input class="forge-param" data-fork-key="handleTipWidthMm" type="number" min="4" max="30" step="0.5" value="10"></label>
+      <label>Espessura extrudada · mm<input class="forge-param" data-fork-key="thicknessMm" type="number" min="1.6" max="8" step="0.1" value="3"></label>
+    </div>
+    <button id="forgeBuild" type="button">Construir prévia do sólido</button>
+  </details>
+  <section class="forge-section"><h3>VISTA CAD · SÓLIDO REAL</h3><div class="forge-viewport"><canvas id="forgeCanvas" aria-label="Pré-visualização tridimensional orbitável do garfo"></canvas></div>
+    <div class="forge-controls"><button id="forgeCut" type="button" disabled>Alternar corte</button><button id="forgeLayers" type="button" disabled>Construir por camadas</button><button id="forgeResetView" type="button">Centralizar vista</button></div>
+    <small class="forge-muted">Arraste para orbitar; use a roda para zoom. O corte e a animação operam na geometria CAD mostrada. A camada visual não representa código G.</small>
+  </section>
+  <section class="forge-section"><h3>MATERIAL E EVIDÊNCIA</h3><label for="forgeMaterial">Grade comercial (não elemento químico)</label><select id="forgeMaterial"><option value="">Carregando catálogo verificado…</option></select><div id="forgeMaterialFacts" class="forge-material"></div></section>
+  <section class="forge-section"><h3>MÉTRICAS E VALIDAÇÃO</h3><div id="forgeMetrics" class="forge-metrics"></div><div id="forgeValidation" class="forge-status" role="status" aria-live="polite">Nenhuma geometria construída.</div></section>
+  <section class="forge-section"><h3>EXPORTAÇÃO E RELATÓRIO</h3><div class="forge-row"><button id="forgeExportStl" class="forge-export" type="button" disabled>Exportar STL binário (mm)</button><button id="forgeExportJson" type="button">Baixar projeto JSON</button><button id="forgeExportReport" type="button" disabled>Baixar relatório técnico</button></div><small class="forge-muted">A exportação STL requer confirmação final e verificação local da malha. Fatiador e impressão física não são acionados.</small></section>
+</section>
+<section id="visionPanel" class="vision-panel" role="dialog" aria-label="Laboratório de Visão Computacional" hidden>
+  <div class="vision-head"><div><span class="forge-kicker">GRID SOUL · PROCESSAMENTO LOCAL · PYTHON</span><h2>LABORATÓRIO DE VISÃO COMPUTACIONAL</h2></div><button id="visionClose" type="button">Fechar</button></div>
+  <p class="vision-intro">A imagem permanece no painel enquanto o enxame é construído. A análise usa Python/OpenCV local; não envia imagens à IA nem à internet. Arraste um PNG, JPG ou WEBP ou selecione um arquivo (máximo 8 MiB e 40 megapixels).</p>
+  <p class="vision-warning">A reconstrução é uma visualização 3D em grade de pixels/cubos, com dimensão e cores proporcionais à imagem. Ela não é automaticamente um CAD industrial, malha fechada, STL imprimível ou prova de resistência. O Atomic Forge atual ainda gera somente o garfo paramétrico documentado.</p>
+  <div class="vision-grid">
+    <section class="vision-card"><h3>IMAGEM DE REFERÊNCIA · CAMADAS E MARCAÇÕES</h3>
+      <label id="visionDrop" class="vision-upload" for="visionFile">Arraste e solte uma imagem aqui ou clique para escolher.</label><input id="visionFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+      <div class="vision-image-frame" id="visionImageFrame" hidden><img id="visionOriginal" alt="Imagem original enviada pelo usuário"><img id="visionAutoLayer" class="vision-layer" alt="Camada de análise" hidden><canvas id="visionAnnotations" data-drawing="false" aria-label="Camada transparente de marcações"></canvas></div>
+      <div class="vision-layers"><label><input id="visionShowOriginal" type="checkbox" checked> Original</label><label><input id="visionShowAuto" type="checkbox"> Contornos</label><label><input id="visionShowSegmentation" type="checkbox"> Mapa de cores</label><label><input id="visionShowAnnotations" type="checkbox" checked> Marcações</label></div>
+      <div class="vision-toolbar"><label>Ferramenta<select id="visionTool"><option value="brush">Pincel</option><option value="line">Linha livre</option><option value="rect">Retângulo</option><option value="circle">Círculo</option><option value="point">Ponto de interesse</option><option value="pan">Navegar</option></select></label><label>Uso<select id="visionMarkMode"><option value="priority">Prioridade de detalhe</option><option value="ignore">Ignorar região</option></select></label><label>Cor<input id="visionMarkColor" type="color" value="#48f5ff"></label><label>Espessura<input id="visionBrushSize" type="range" min="2" max="80" value="18"></label></div>
+      <div class="vision-row"><button id="visionDrawToggle" type="button">Ativar desenho</button><button id="visionUndo" type="button" disabled>Desfazer</button><button id="visionRedo" type="button" disabled>Refazer</button><button id="visionClearMarks" class="vision-danger" type="button">Limpar marcações</button></div>
+      <div class="vision-comparison" style="margin-top:10px"><img id="visionCompareOriginal" alt="Original para comparação"><img id="visionCompareResult" alt="Projeção renderizada para comparação"></div>
+    </section>
+    <section class="vision-card"><h3>ANÁLISE CROMÁTICA E CONFIGURAÇÃO DO ENXAME</h3>
+      <div class="vision-controls"><label>Resolução<select id="visionQuality"><option value="draft">Rascunho · 6.000 amostras</option><option value="balanced" selected>Equilibrado · 24.000 amostras</option><option value="high">Alta definição · 60.000 amostras</option><option value="detailed">Detalhado · 100.000 amostras</option><option value="custom">Personalizada</option></select></label><label>Cores a preservar<select id="visionColors"><option>8</option><option>16</option><option selected>32</option><option>64</option><option>128</option></select></label><label>População<input id="visionPopulation" type="number" min="1000" max="100000" step="1000" value="24000"></label><label>Largura física da imagem · mm<input id="visionWidth" type="number" min="10" max="1000000" step="1" value="150"></label><label>Espaço entre cubos · %<input id="visionGap" type="range" min="0" max="35" value="4"></label><label>Peso dos contornos · <span id="visionEdgeWeightValue">1,0</span><input id="visionEdgeWeight" type="range" min="0" max="3" step="0.1" value="1"></label><label>Altura visual 3D · mm<input id="visionDepth" type="number" min="0" max="100" step="0.1" value="1.6"></label><label>Rotação da referência<select id="visionRotation"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></label><label>Semente reproduzível<input id="visionSeed" type="number" value="20261022"></label></div>
+      <div class="vision-row"><button id="visionAnalyze" type="button">Analisar imagem</button><button id="visionReconstruct" type="button">Reconstruir com enxame</button><button id="visionCompare" type="button">Comparar grade de cores</button></div>
+      <div id="visionPalette" class="vision-swatches" aria-label="Cores predominantes"></div><div id="visionMetrics" class="vision-metrics"></div>
+      <div id="visionStatus" class="vision-status" role="status" aria-live="polite">Escolha uma imagem para começar; nenhum arquivo foi enviado ainda.</div>
+      <div class="vision-viewport"><canvas id="visionCanvas" aria-label="Prévia tridimensional do enxame de microcubos"></canvas></div>
+      <div class="vision-row"><button id="visionExportPng" type="button" disabled>Renderização PNG</button><button id="visionExportPalette" type="button" disabled>Paleta JSON</button><button id="visionExportCoords" type="button" disabled>Coordenadas JSON</button></div>
+      <div class="vision-row"><button id="visionExportStl" type="button" disabled>Relevo 2.5D · STL</button><button id="visionExportObj" type="button" disabled>Malha OBJ + MTL</button></div>
+      <h3 style="margin-top:14px">PROJETO LOCAL · CONTINUAR EM OUTRO DIA</h3><div class="vision-controls"><label>Nome do projeto<input id="visionProjectName" type="text" maxlength="80" value="Reconstrução de imagem"></label><label>Projetos salvos neste computador<select id="visionProjectList"><option value="">Carregando...</option></select></label></div>
+      <input id="visionProjectFile" type="file" accept="application/json,.json" hidden>
+      <div class="vision-row"><button id="visionSave" type="button" disabled>Salvar projeto local</button><button id="visionLoad" type="button">Abrir projeto</button><button id="visionDownloadProject" type="button" disabled>Baixar projeto JSON</button><button id="visionImportProject" type="button">Importar projeto JSON</button></div>
+      <small class="vision-note">Salvar local grava a imagem, as marcações, parâmetros e a amostragem em data/vision-projects/ deste servidor. O salvamento persiste após fechar o navegador. A versão atual salva uma imagem/projeto; não oferece edição de mapas 200 m por blocos ou montagem de mosaicos. A largura salva é uma escala declarada, não uma validação de fabricação.</small>
+    </section>
+  </div>
+</section>
+<script type="importmap">
+{"imports":{"three":"/vendor/three/build/three.module.js","three/addons/":"/vendor/three/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GridSoulBabylonStage } from '/babylon-stage.js';
+import { adaptGridSoulPlan } from '/babylon-plan-adapter.js';
+import {
+  GRID_SOUL_IDENTITY_VERSION,
+  gridSoulAtomicNumberForCube,
+  gridSoulBuildIdentityMap,
+  gridSoulColorForAtomicNumber,
+  gridSoulCountForElement,
+  gridSoulElementByAtomicNumber
+} from '/components/chemistry.js';
+import {
+  GRID_SOUL_REFERENCE_FACE_FRAME,
+  gridSoulLoadReferenceFaceAtlas,
+  gridSoulReferenceFaceColorForCube,
+  gridSoulReferenceFacePointForCube
+} from '/components/reference_face_voxels.js';
+import {
+  GRID_SOUL_FACE_EYE_CENTER_V,
+  GRID_SOUL_FACE_MOUTH_CENTER_V,
+  gridSoulBuildFacialRegions,
+  gridSoulEyeBlinkAmount,
+  gridSoulTalkAmount
+} from '/components/face_expression.js';
+
+const stage=document.querySelector('#stage');
+const state=document.querySelector('#state');
+const reply=document.querySelector('#reply');
+const send=document.querySelector('#send');
+const openShowcaseButton=document.querySelector('#openShowcase');
+const fitViewButton=document.querySelector('#fitViewButton');
+const populationInput=document.querySelector('#population');
+const energyInput=document.querySelector('#energy');
+const cubeSizeInput=document.querySelector('#cubeSize');
+const cubeSizeOut=document.querySelector('#cubesizeout');
+const popout=document.querySelector('#popout');
+const energyout=document.querySelector('#energyout');
+const paletteSelect=document.querySelector('#paletteMode');
+const focusNotice=document.querySelector('#focusNotice');
+const elementCatalog=document.querySelector('#elementCatalog');
+let memorySaveTimer=null;
+
+const primaryCanvas=document.querySelector('#primaryCanvas');
+const renderMetrics=document.querySelector('#renderMetrics');
+const mainRenderer=new GridSoulBabylonStage(primaryCanvas,renderMetrics,({backend,error})=>{
+ if(backend==='failed'){
+   renderMetrics.textContent='Babylon.js indisponível; confira WebGL/WebGPU e o console local.';
+   renderMetrics.title=String(error?.message||error||'');
+ }
+});
+
+let CAPACITY=2000;
+const MAX_PARTICLES=500000;
+const dummy=new THREE.Object3D();
+const pointScratch=new THREE.Vector3();
+const partRotationScratch=new THREE.Euler();
+const partTranslationScratch=new THREE.Vector3();
+const atomPointScratch=new THREE.Vector3();
+const atomRotationScratch=new THREE.Euler();
+let current=new Float32Array(CAPACITY*3);
+let target=new Float32Array(CAPACITY*3);
+// Vetores tipados mantêm o estado cinemático compacto até 500.000 slots.
+let velocity=new Float32Array(CAPACITY*3);
+let instanceColors=new Float32Array(CAPACITY*3);
+// Um número atômico explícito por instância; o mesmo slot mantém o mesmo Z.
+let cubeAtomicNumbers=gridSoulBuildIdentityMap(CAPACITY);
+let focusedAtomicNumber=null;
+let active=2000;
+let shape='cloud';
+let customParts=[];
+let energy=.6;
+let scale=2;
+let cubeSize=1;
+let move=new THREE.Vector3();
+let rotation=new THREE.Euler();
+let color=new THREE.Color('#35eaff');
+let paletteMode='chemical';
+let faceProfile=null;
+let materialProfile=null;
+let referenceFaceAtlas=null;
+let referenceFaceAtlasPromise=null;
+let faceAnimationRegions=null;
+let faceAnimationStartedAt=performance.now();
+const defaultBackground='#020711';
+let phase=0;
+let morphing=true;
+
+function rand(i,salt=0){
+ const x=Math.sin((i+1)*127.1+(salt+1)*311.7)*43758.5453;
+ return x-Math.floor(x);
+}
+
+function pointFor(i,n,form,out=pointScratch){
+ const u=(i+.5)/n;
+ const a=i*2.399963229728653;
+ const r=Math.sqrt(u);
+ let x=0,y=0,z=0;
+
+ if(form==='sphere'){
+   const yy=1-2*u, rr=Math.sqrt(1-yy*yy);
+   x=Math.cos(a)*rr; y=yy; z=Math.sin(a)*rr;
+ }else if(form==='torus'){
+   // Volume toroidal: um único enxame preenchendo o corpo do anel.
+   // A distribuição radial mantém densidade no centro e nas bordas.
+   const t=a;
+   const q=2*Math.PI*rand(i,1);
+   const rho=.38*Math.sqrt(rand(i,2));
+   x=(1+rho*Math.cos(q))*Math.cos(t);
+   y=rho*Math.sin(q);
+   z=(1+rho*Math.cos(q))*Math.sin(t);
+ }else if(form==='spiral'){
+   const t=u*Math.PI*18, r=.15+u*2.2;
+   x=r*Math.cos(t); y=(u-.5)*4; z=r*Math.sin(t);
+ }else if(form==='wave'){
+   const cols=Math.ceil(Math.sqrt(n));
+   x=((i%cols)/cols-.5)*4;
+   z=(Math.floor(i/cols)/cols-.5)*4;
+   y=.65*Math.sin(x*2.2+z*1.7);
+ }else if(form==='terrain'){
+   // Terreno procedural: um unico enxame distribuido por uma superficie.
+   const cols=Math.ceil(Math.sqrt(n));
+   const row=Math.floor(i/cols);
+   const col=i%cols;
+   const gx=(col/Math.max(1,cols-1))*2-1;
+   const gz=(row/Math.max(1,cols-1))*2-1;
+
+   const peak=(cx,cz,sx,sz)=>
+     Math.exp(-(((gx-cx)**2)/sx+((gz-cz)**2)/sz));
+
+   const tx=gx*1.7;
+   const tz=gz*1.7;
+   const ty=
+     -0.08
+     +0.16*Math.sin(gx*5.5+gz*2.2)*Math.cos(gz*4.8-gx*1.4)
+     +0.78*peak(-0.42,-0.22,0.10,0.18)
+     +0.92*peak(0.18,0.10,0.075,0.11)
+     +0.62*peak(0.62,-0.48,0.12,0.10)
+     +0.48*peak(-0.15,0.62,0.20,0.12)
+     +0.20*peak(-0.72,0.35,0.08,0.22);
+
+   return out.set(tx,ty,tz);
+ }else if(form==='face'){
+   if(!referenceFaceAtlas) throw new Error('Atlas de cubos da referência ainda não foi carregado.');
+   const facePoint=gridSoulReferenceFacePointForCube(i,n,referenceFaceAtlas,faceProfile?.face?.orientation);
+   return out.set(facePoint[0],facePoint[1],facePoint[2]);
+ }else if(form==='custom' && customParts.length){
+   const part=customParts[i%customParts.length];
+   const localI=Math.floor(i/customParts.length);
+   const localN=Math.max(1,Math.ceil(n/customParts.length));
+   const v=(localI+.5)/localN;
+   const angle=localI*2.399963229728653;
+   let vx=0,vy=0,vz=0;
+
+   if(part.kind==='sphere'||part.kind==='ellipsoid'){
+     vy=1-2*v;
+     const ring=Math.sqrt(Math.max(0,1-vy*vy));
+     vx=Math.cos(angle)*ring;
+     vz=Math.sin(angle)*ring;
+   }else if(part.kind==='box'){
+     vx=rand(localI,11)*2-1;
+     vy=rand(localI,12)*2-1;
+     vz=rand(localI,13)*2-1;
+   }else if(part.kind==='torus'){
+     const tube=Math.sqrt(v)*Math.PI*2;
+     vx=(0.72+0.25*Math.cos(tube))*Math.cos(angle);
+     vy=0.25*Math.sin(tube);
+     vz=(0.72+0.25*Math.cos(tube))*Math.sin(angle);
+   }else if(part.kind==='cylinder'){
+     const radius=Math.sqrt(v);
+     vx=radius*Math.cos(angle);
+     vy=rand(localI,14)*2-1;
+     vz=radius*Math.sin(angle);
+   }else if(part.kind==='cone'){
+     const radius=Math.sqrt(v);
+     vy=1-2*v;
+     const coneRadius=(1-vy)/2;
+     vx=coneRadius*Math.cos(angle);
+     vz=coneRadius*Math.sin(angle);
+   }
+
+   out.set(vx*part.sx,vy*part.sy,vz*part.sz);
+   partRotationScratch.set(part.rx,part.ry,part.rz);
+   partTranslationScratch.set(part.x,part.y,part.z);
+   out.applyEuler(partRotationScratch).add(partTranslationScratch);
+   x=out.x;
+   y=out.y;
+   z=out.z;
+ }else{
+   const rr=Math.cbrt(u)*1.9;
+   x=rr*Math.cos(a)*Math.sqrt(1-rand(i,2)*.25);
+   y=rr*(rand(i,3)*2-1);
+   z=rr*Math.sin(a)*Math.sqrt(1-rand(i,4)*.25);
+ }
+ return out.set(x,y,z);
+}
+
+async function ensureReferenceFaceAtlas(){
+ if(referenceFaceAtlas)return referenceFaceAtlas;
+ if(!referenceFaceAtlasPromise){
+   referenceFaceAtlasPromise=gridSoulLoadReferenceFaceAtlas()
+     .then(atlas=>(referenceFaceAtlas=atlas))
+     .catch(error=>{referenceFaceAtlasPromise=null;throw error;});
+ }
+ return referenceFaceAtlasPromise;
+}
+
+function prepareFaceAnimationRegions(population){
+ if(shape!=='face'||!referenceFaceAtlas){
+   faceAnimationRegions=null;
+   return;
+ }
+ if(faceAnimationRegions?.population!==population){
+   faceAnimationRegions=gridSoulBuildFacialRegions(population,referenceFaceAtlas);
+ }
+}
+
+function ensureCapacity(required){
+ if(!Number.isSafeInteger(required)||required<1||required>MAX_PARTICLES){
+   throw new Error('Quantidade de partículas fora do limite de segurança (500.000).');
+ }
+ if(required<=CAPACITY)return;
+
+ const nextCapacity=Math.min(
+   MAX_PARTICLES,
+   Math.max(required,Math.ceil(CAPACITY*1.5))
+ );
+
+ const nextCurrent=new Float32Array(nextCapacity*3);
+ const nextTarget=new Float32Array(nextCapacity*3);
+ const nextVelocity=new Float32Array(nextCapacity*3);
+ const nextColors=new Float32Array(nextCapacity*3);
+ nextCurrent.set(current.subarray(0,Math.min(current.length,nextCurrent.length)));
+ nextTarget.set(target.subarray(0,Math.min(target.length,nextTarget.length)));
+ nextVelocity.set(velocity.subarray(0,Math.min(velocity.length,nextVelocity.length)));
+ nextColors.set(instanceColors.subarray(0,Math.min(instanceColors.length,nextColors.length)));
+ current=nextCurrent; target=nextTarget; velocity=nextVelocity; instanceColors=nextColors;
+ const nextIdentities=new Uint8Array(nextCapacity);
+ nextIdentities.set(cubeAtomicNumbers);
+ for(let slot=CAPACITY;slot<nextCapacity;slot++){
+   nextIdentities[slot]=gridSoulAtomicNumberForCube(slot);
+ }
+ cubeAtomicNumbers=nextIdentities;
+ CAPACITY=nextCapacity;
+ mainRenderer.ensureCapacity(nextCapacity);
+ populationInput.max=String(MAX_PARTICLES);
+}
+
+
+// GRID_SOUL_PERIODIC_TABLE_V1
+let gsPeriodicMode = false;
+let gsPeriodicLabels = false;
+let gsPeriodicElements = [];
+
+function gsPeriodicPosition(e) {
+  return {
+    x: (e.group - 9.5) * 0.72,
+    y: (4.5 - e.period) * 0.72,
+    z: 0
+  };
+}
+
+function gsBuildPeriodicLabels() {
+  if (gsPeriodicLabels) {
+    mainRenderer.setPeriodicVisible(true);
+    return;
+  }
+  mainRenderer.buildPeriodicLabels(gsPeriodicElements,gridSoulColorForAtomicNumber,gsPeriodicPosition);
+  gsPeriodicLabels = true;
+  mainRenderer.setPeriodicVisible(true);
+}
+
+function gsBuildHtmlCatalog(elements){
+ const grid=elementCatalog;
+ grid.replaceChildren();
+ for(const element of elements){
+   const button=document.createElement('button');
+   button.type='button';
+   button.className='element-chip';
+   button.style.gridColumn=String(element.group);
+   button.style.gridRow=String(element.period);
+   button.style.setProperty('--element-color',gridSoulColorForAtomicNumber(element.z));
+   button.dataset.atomicNumber=String(element.z);
+   button.title=`${element.n} · Z=${element.z} · massa de referência ${element.a}`;
+   button.setAttribute('role','gridcell');
+   button.innerHTML=`<strong>${element.s}</strong><span>${element.z}</span>`;
+   button.addEventListener('click',()=>gsFocusElement(element.z));
+   grid.append(button);
+ }
+ updateFocusNotice();
+}
+
+function updateFocusNotice(){
+ if(!focusNotice)return;
+ if(!focusedAtomicNumber){
+   focusNotice.textContent='Cada slot conserva seu número atômico ao mudar a forma.';
+ }else{
+   const element=gridSoulElementByAtomicNumber(focusedAtomicNumber);
+   const count=gridSoulCountForElement(active,focusedAtomicNumber);
+   focusNotice.textContent=`Em destaque: ${element.name} (${element.symbol}, Z=${element.z}) · ${count.toLocaleString('pt-BR')} microcubos.`;
+ }
+ elementCatalog?.querySelectorAll('.element-chip').forEach(button=>{
+   button.setAttribute('aria-pressed',String(Number(button.dataset.atomicNumber)===focusedAtomicNumber));
+ });
+}
+
+function gsFocusElement(atomicNumber){
+ const element=gsPeriodicElements.find(item=>item.z===atomicNumber);
+ if(!element)return;
+ focusedAtomicNumber=element.z;
+ gsElement=element;
+ updateFocusNotice();
+ updateSwarmColors();
+ state.textContent=`Elemento em destaque: ${element.s} · ${element.n} · Z=${element.z}`;
+ persistCurrentState();
+}
+
+function gsLoadPeriodicCatalog() {
+  import('/components/periodic_table.js').then(module => {
+    gsPeriodicElements = module.GRID_SOUL_ELEMENTS.map(e => ({
+      s: e.symbol, n: e.name, z: e.z, a: e.mass,
+      period: e.period, group: e.group
+    }));
+    if (gsElements.length !== 118) {
+      gsElements.splice(0, gsElements.length, ...gsPeriodicElements);
+    }
+    gsElement = gsPeriodicElements.find(e => e.s === 'C') || gsElements[0];
+    gsBuildHtmlCatalog(gsPeriodicElements);
+    console.info('GRID SOUL: catálogo periódico carregado:', gsPeriodicElements.length);
+  }).catch(error => {
+    console.error('GRID SOUL: catálogo periódico não carregado', error);
+  });
+}
+gsLoadPeriodicCatalog();
+
+function buildTargets(){
+ const buildStarted=performance.now();
+ active=Math.round(Math.max(1000,Math.min(MAX_PARTICLES,active)));
+ ensureCapacity(active);
+ prepareFaceAnimationRegions(active);
+ let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+ for(let i=0;i<active;i++){
+   const offset=i*3;
+   if (gsPeriodicMode && gsPeriodicElements.length === 118) {
+     const e = gsPeriodicElements[cubeAtomicNumbers[i] - 1];
+     const p = gsPeriodicPosition(e);
+     const layer = Math.floor(i / 118);
+     const angle = layer * 2.399963229728653;
+     const radius = 0.055 * Math.sqrt(layer);
+     target[offset]=p.x+Math.cos(angle)*radius;
+     target[offset+1]=p.y+Math.sin(angle)*radius;
+     target[offset+2]=p.z+((layer%5)-2)*0.035;
+   } else {
+     const point=pointFor(i,active,shape);
+     target[offset]=point.x*scale;
+     target[offset+1]=point.y*scale;
+     target[offset+2]=point.z*scale;
+   }
+   dummy.position.set(target[offset],target[offset+1],target[offset+2]).applyEuler(rotation).add(move);
+   minX=Math.min(minX,dummy.position.x);maxX=Math.max(maxX,dummy.position.x);
+   minY=Math.min(minY,dummy.position.y);maxY=Math.max(maxY,dummy.position.y);
+   minZ=Math.min(minZ,dummy.position.z);maxZ=Math.max(maxZ,dummy.position.z);
+ }
+ mainRenderer.setFitBounds({x:minX,y:minY,z:minZ},{x:maxX,y:maxY,z:maxZ},Math.abs(cubeSize)*.0275);
+ mainRenderer.setPopulation(active);
+ morphing=true;
+ popout.value=active;
+ populationInput.value=active;
+ updateSwarmColors();
+ mainRenderer.setBuildTime(performance.now()-buildStarted);
+ updateFocusNotice();
+ state.textContent=`Enxame: ${active.toLocaleString('pt-BR')} microcubos · forma: ${shape}`;
+}
+
+function persistCurrentState(){
+ const plan={
+   reply:reply.textContent||'Estado visual restaurado.',
+   shape, population:active, energy, scale, cubeSize,
+   rotationX:rotation.x, rotationY:rotation.y, rotationZ:rotation.z,
+   moveX:move.x, moveY:move.y, moveZ:move.z,
+   color:'#'+color.getHexString(), parts:customParts,
+   paletteMode, focusedAtomicNumber, faceProfile, materials:materialProfile,
+   identityVersion:GRID_SOUL_IDENTITY_VERSION
+ };
+ if(memorySaveTimer) clearTimeout(memorySaveTimer);
+ memorySaveTimer=setTimeout(()=>{
+   fetch('/api/memory/state',{
+     method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({plan})
+   }).catch(()=>{});
+ },250);
+}
+
+function applyFaceProfileAppearance(){
+ const profile=shape==='face'?faceProfile:null;
+ if(shape==='face'&&referenceFaceAtlas){
+   mainRenderer.setFaceAtlasMode(true);
+   mainRenderer.setAppearance({background:'#020617',fog:false,unlit:true,albedo:'#FFFFFF',metallic:0,roughness:1,emissive:'#000000',emissiveIntensity:0});
+   return;
+ }
+ mainRenderer.setFaceAtlasMode(false);
+ if(!profile){
+   const m=materialProfile||{};
+   mainRenderer.setAppearance({background:defaultBackground,fog:true,unlit:false,albedo:m.albedo||'#FFFFFF',metallic:m.metallic??.25,roughness:m.roughness??.25,emissive:m.emissiveColor||'#073D58',emissiveIntensity:m.emissiveIntensity??1.5,ambient:1.3,keyLight:2.2,rimLight:1.4});
+ }else{
+   const m=profile.materials||{};
+   const l=profile.lighting||{};
+   mainRenderer.setAppearance({background:l.background||defaultBackground,fog:true,unlit:false,albedo:'#FFFFFF',metallic:m.metallic??.25,roughness:m.roughness??.25,emissive:'#05101A',emissiveIntensity:m.emissiveIntensity??1.5,ambient:(l.ambient??.2)*8,keyLight:32*(l.contrast??1),rimLight:24*(l.contrast??1)});
+ }
+}
+
+function faceOrbitCount(population){
+ if(shape!=='face')return 0;
+ if(referenceFaceAtlas)return 0;
+ if(faceProfile?.particles){
+   if(!faceProfile.particles.enabled)return 0;
+   return Math.min(population-1,faceProfile.particles.count>0
+     ?faceProfile.particles.count:Math.max(1,Math.round(population*.035)));
+ }
+ return population>=100?Math.max(1,Math.round(population*.035)):0;
+}
+
+async function applyPlan(rawPlan){
+ const p=adaptGridSoulPlan(rawPlan);
+ customParts=Array.isArray(p.parts)?p.parts:[];
+ materialProfile=p.materials&&typeof p.materials==='object'?p.materials:null;
+ const requestedCommand=document.querySelector('#command').value;
+ shape=/\bterrain\b|terreno/i.test(requestedCommand)?'terrain'
+   :/\b(rosto|face|humanoide|facial)\b/i.test(requestedCommand)?'face':p.shape;
+ const exactReferenceMatch=/\b(exatamente|id[eê]ntic[oa]|igual|fiel)\b/i.test(requestedCommand)
+   && /\b(rosto|face|humanoide|refer[eê]ncia|anexo|imagem)\b/i.test(requestedCommand);
+ faceProfile=shape==='face'&&p.faceProfile&&typeof p.faceProfile==='object'?p.faceProfile:null;
+ if(shape==='face'){
+   await ensureReferenceFaceAtlas();
+   faceAnimationStartedAt=performance.now();
+ }
+ active=Math.round(Math.max(1000,Math.min(MAX_PARTICLES,p.population)));
+ energy=p.energy;
+ scale=p.scale;
+ cubeSize=p.cubeSize;
+ move.set(p.moveX,p.moveY,p.moveZ);
+ rotation.set(p.rotationX,p.rotationY,p.rotationZ);
+ if(shape==='face'&&faceProfile?.face)faceProfile.face.orientation='frontal';
+ if(shape==='face'&&exactReferenceMatch){
+   move.set(0,0,0);
+   rotation.set(0,0,0);
+ }
+ color.set(p.color);
+ const detectedPalette=detectPalette(requestedCommand);
+ const normalizedFaceColorCommand=requestedCommand.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const faceFeatureColorCommand=shape==='face'
+   && /\b(olho|olhos|sobrancelha|sobrancelhas|labio|labios|nariz)\b/.test(normalizedFaceColorCommand)
+   && /\b(ciano|azul|violeta|roxo|magenta|dourado|dourada)\b/.test(normalizedFaceColorCommand);
+ paletteMode=shape==='face'?'face':faceFeatureColorCommand?'face':detectedPalette || (['chemical','single','rainbow','plasma','fire','green','cyan','face'].includes(p.paletteMode)
+   ? p.paletteMode
+   : shape==='face' ? 'face' : 'chemical');
+ if(shape!=='face'&&paletteMode==='face') paletteMode='chemical';
+ if(shape==='face'&&paletteMode==='chemical') paletteMode='face';
+ paletteSelect.disabled=shape==='face';
+ applyFaceProfileAppearance();
+ if(Number.isInteger(p.focusedAtomicNumber)&&p.focusedAtomicNumber>=1&&p.focusedAtomicNumber<=118){
+   focusedAtomicNumber=p.focusedAtomicNumber;
+ }else{
+   focusedAtomicNumber=null;
+ }
+ paletteSelect.value=paletteMode;
+ updateFocusNotice();
+ energyInput.value=energy;
+ energyout.value=energy.toFixed(2);
+ cubeSizeInput.value=String(cubeSize);
+ cubeSizeOut.value=`${cubeSize.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}×`;
+ buildTargets();
+ const unsupported=[];
+ if(shape==='face'&&faceProfile){
+   unsupported.push('iluminação facial por pixel (as cores RGB do atlas preservam a referência)');
+   if(faceProfile.particles?.enabled&&faceProfile.particles.count>0)
+     unsupported.push('orbitais adicionais parametrizados (cubos periféricos já estão no atlas)');
+ }
+ if(faceProfile?.lighting?.bloom>0) unsupported.push('bloom');
+ if(faceProfile?.render?.shadows) unsupported.push('sombras');
+ if(faceProfile?.render?.depthOfField>0) unsupported.push('profundidade de campo');
+ if(faceProfile?.mesh?.lod) unsupported.push('LOD');
+ if(faceProfile?.render?.quality==='ultra') unsupported.push('qualidade ultra além do antialiasing já ativo');
+ if(faceProfile?.mesh?.edgeDefinition>0||faceProfile?.mesh?.surfaceContinuity<1) unsupported.push('acabamento de aresta/continuidade da malha');
+ if(faceProfile?.geometry?.grid?.spacing>0) unsupported.push('spacing independente entre centros');
+ if(faceProfile?.render?.transparentBackground) unsupported.push('fundo transparente');
+ const voxelNotice=shape==='face'
+   ?'Reconstrução frontal feita somente com cubos instanciados e cores da referência; nenhuma foto, textura facial ou malha de rosto é renderizada. Os olhos piscam a cada 10 segundos e a boca se move continuamente (animação visual, sem áudio).'
+   :'';
+ reply.textContent=[p.reply,voxelNotice,unsupported.length
+   ?`Efeitos não implementados no renderer atual: ${unsupported.join(', ')}.`:''].filter(Boolean).join('\n');
+ gsWake();
+ persistCurrentState();
+}
+
+function openShowcase(updateAddress=false){
+ if(updateAddress){
+   const url=new URL(location.href);
+   url.searchParams.set('demo','1');
+   history.replaceState(null,'',url);
+ }
+ if(memorySaveTimer) clearTimeout(memorySaveTimer);
+ memorySaveTimer=null;
+ customParts=[];
+ shape='cloud';
+ active=2000;
+ energy=.6;
+ scale=2;
+ cubeSize=1;
+ move.set(0,0,0);
+ rotation.set(0,0,0);
+ color.set('#35eaff');
+ paletteMode='chemical';
+ faceProfile=null;
+ materialProfile=null;
+ focusedAtomicNumber=null;
+ populationInput.value='2000';
+ popout.value='2000';
+ energyInput.value='.6';
+ energyout.value='0.60';
+ cubeSizeInput.value='1';
+ cubeSizeOut.value='1,00×';
+ paletteSelect.value='chemical';
+ paletteSelect.disabled=false;
+ applyFaceProfileAppearance();
+ document.querySelector('#command').value='';
+ send.disabled=false;
+ gsPeriodicMode=false;
+ gsIsResting=false;
+ if(gsIdleTimer!==null) clearTimeout(gsIdleTimer);
+ gsIdleTimer=null;
+ if(gsPeriodicLabels)mainRenderer.setPeriodicVisible(false);
+ mainRenderer.setAtomVisible(false);
+ mainRenderer.setCamera({x:0,y:5,z:19},{x:0,y:0,z:0});
+ ensureCapacity(active);
+ current.fill(0);
+ velocity.fill(0);
+ buildTargets();
+ updateFocusNotice();
+ reply.textContent='Demonstração aberta · 2.000 microcubos · 118 identidades químicas.';
+ state.textContent='Demonstração GRID SOUL · nuvem química · 2.000 microcubos';
+ gsWake();
+}
+
+
+
+function detectPalette(command){
+ const s=String(command||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+
+ if(/\b(arco.?iris|rainbow|multicolor|multicor|varias cores|muitas cores|todas as cores)\b/.test(s)) return 'rainbow';
+ if(/\b(plasma|roxo|violeta|magenta|purple)\b/.test(s)) return 'plasma';
+ if(/\b(fogo|chamas|incendio|laranja|vermelho|fire)\b/.test(s)) return 'fire';
+ if(/\b(verde|neon green|verde neon)\b/.test(s)) return 'green';
+ if(/\b(ciano|azul|azul eletrico|cyan|azul neon)\b/.test(s)) return 'cyan';
+ if(/\b(identidade quimica|cores quimicas|paleta quimica)\b/.test(s)) return 'chemical';
+ if(/\b(cor unica|uma unica cor|monocromatico|monocromatica|voltar a cor original|cor original)\b/.test(s)) return 'single';
+
+ return null;
+}
+
+
+function updateSwarmColors(){
+ const c=new THREE.Color();
+ for(let i=0;i<active;i++){
+   const t=active>1?i/(active-1):0;
+   const atomicNumber=cubeAtomicNumbers[i];
+   if(shape==='face'&&referenceFaceAtlas&&!gsPeriodicMode){
+     c.set(gridSoulReferenceFaceColorForCube(i,active,referenceFaceAtlas));
+   }else if(focusedAtomicNumber){
+     c.set(atomicNumber===focusedAtomicNumber
+       ? gridSoulColorForAtomicNumber(atomicNumber)
+       : '#101c29');
+   }else if(shape==='face'&&paletteMode==='face'){
+     c.set('#00E5FF');
+   }else if(gsPeriodicMode||paletteMode==='chemical'){
+     c.set(gridSoulColorForAtomicNumber(atomicNumber));
+   }else if(paletteMode==='rainbow'){
+     c.setHSL((t+phase*.012)%1,.95,.58);
+   }else if(paletteMode==='plasma'){
+     c.setHSL(.76-t*.19,.95,.48+.12*Math.sin(t*12+phase));
+   }else if(paletteMode==='fire'){
+     c.setHSL(.015+t*.105,1,.34+.28*t);
+   }else if(paletteMode==='green'){
+     c.setHSL(.28+t*.12,.95,.38+.2*Math.sin(t*16));
+   }else if(paletteMode==='cyan'){
+     c.setHSL(.49+t*.055,.98,.48+.16*Math.sin(t*18));
+   }else{
+     c.copy(color);
+   }
+   if(shape==='custom'&&paletteMode==='chemical'&&customParts.length){
+     const componentColor=customParts[i%customParts.length]?.color;
+     if(componentColor&&!(focusedAtomicNumber&&atomicNumber===focusedAtomicNumber))c.set(componentColor);
+   }
+   const offset=i*3;
+   instanceColors[offset]=c.r;
+   instanceColors[offset+1]=c.g;
+   instanceColors[offset+2]=c.b;
+ }
+ mainRenderer.setColors(instanceColors,active);
+}
+
+function presets(form){
+ shape=form;
+ if(form!=='face')faceProfile=null;
+ if(form==='face'&&!referenceFaceAtlas){
+   ensureReferenceFaceAtlas().then(()=>presets('face')).catch(error=>{
+     reply.textContent='Erro ao carregar o mapa de cubos da referência: '+error.message;
+   });
+   return;
+ }
+ if(form==='face')faceAnimationStartedAt=performance.now();
+ paletteSelect.disabled=shape==='face';
+ if(shape==='face')paletteMode='face';
+ else if(paletteMode==='face')paletteMode='chemical';
+ paletteSelect.value=paletteMode;
+ applyFaceProfileAppearance();
+ buildTargets();
+ persistCurrentState();
+}
+
+openShowcaseButton.addEventListener('click',()=>openShowcase(true));
+fitViewButton.addEventListener('click',()=>mainRenderer.fitView(true));
+
+populationInput.addEventListener('input',()=>{
+ active=Math.min(MAX_PARTICLES,Number(populationInput.value));
+ ensureCapacity(active);
+ popout.value=active;
+ buildTargets();
+ persistCurrentState();
+});
+energyInput.addEventListener('input',()=>{
+ energy=Number(energyInput.value);
+ energyout.value=energy.toFixed(2);
+ persistCurrentState();
+});
+cubeSizeInput.addEventListener('input',()=>{
+ cubeSize=Number(cubeSizeInput.value);
+ cubeSizeOut.value=`${cubeSize.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}×`;
+ persistCurrentState();
+});
+
+paletteSelect.addEventListener('change',()=>{
+ paletteMode=paletteSelect.value;
+ updateSwarmColors();
+ persistCurrentState();
+});
+document.querySelector('#clearElementFocus').addEventListener('click',()=>{
+ focusedAtomicNumber=null;
+ updateFocusNotice();
+ updateSwarmColors();
+ persistCurrentState();
+});
+
+send.addEventListener('click',async()=>{
+ const gsPrompt=document.querySelector('#command').value;
+ gsChooseElement(gsPrompt);
+ gsWake();
+ const message=document.querySelector('#command').value.trim();
+ if(!message||send.disabled)return;
+ send.disabled=true;
+ state.textContent='ChatGPT está planejando a transformação...';
+ try{
+   const response=await fetch('/api/command',{
+     method:'POST',
+     headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({message,population:active,energy,scale,cubeSize})
+   });
+   const data=await response.json();
+   if(!response.ok)throw new Error(data.error||'Erro na API');
+   await applyPlan(data);
+ }catch(e){
+   reply.textContent='Erro: '+e.message;
+   state.textContent='Aguardando correção';
+ }finally{
+   send.disabled=false;
+ }
+});
+
+document.querySelector('#command').addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send.click();}
+});
+
+function resize(){
+ const w=stage.clientWidth,h=stage.clientHeight;
+ if(!w||!h)return;
+ mainRenderer.resize();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+buildTargets();
+
+
+// GRID_SOUL_ATOMIC_REST_V2
+// Repouso real: esconde o enxame anterior e mostra um único átomo central.
+// Modelo de Bohr didático, não uma visualização literal de orbitais quânticos.
+const gsElements = [
+ {s:'H',n:'Hidrogênio',z:1,a:1},
+ {s:'He',n:'Hélio',z:2,a:4},
+ {s:'Li',n:'Lítio',z:3,a:7},
+ {s:'Be',n:'Berílio',z:4,a:9},
+ {s:'B',n:'Boro',z:5,a:11},
+ {s:'C',n:'Carbono',z:6,a:12},
+ {s:'N',n:'Nitrogênio',z:7,a:14},
+ {s:'O',n:'Oxigênio',z:8,a:16},
+ {s:'F',n:'Flúor',z:9,a:19},
+ {s:'Ne',n:'Neônio',z:10,a:20},
+ {s:'Na',n:'Sódio',z:11,a:23},
+ {s:'Mg',n:'Magnésio',z:12,a:24},
+ {s:'Al',n:'Alumínio',z:13,a:27},
+ {s:'Si',n:'Silício',z:14,a:28},
+ {s:'P',n:'Fósforo',z:15,a:31},
+ {s:'S',n:'Enxofre',z:16,a:32},
+ {s:'Cl',n:'Cloro',z:17,a:35},
+ {s:'Ar',n:'Argônio',z:18,a:40},
+ {s:'K',n:'Potássio',z:19,a:39},
+ {s:'Ca',n:'Cálcio',z:20,a:40},
+ {s:'Fe',n:'Ferro',z:26,a:56},
+ {s:'Cu',n:'Cobre',z:29,a:64},
+ {s:'Zn',n:'Zinco',z:30,a:64},
+ {s:'Ag',n:'Prata',z:47,a:108},
+ {s:'Au',n:'Ouro',z:79,a:197},
+ {s:'Hg',n:'Mercúrio',z:80,a:201},
+ {s:'Pb',n:'Chumbo',z:82,a:207},
+ {s:'U',n:'Urânio',z:92,a:238}
+];
+let gsElement = gsElements.find(e=>e.s==='C');
+let gsIdleTimer = null;
+let gsIsResting = false;
+let gsLastTouch = performance.now();
+
+function gsDisposeAtom() {
+ mainRenderer.clearAtom();
+ gsElectrons=[];
+ gsElectronPositions=new Float32Array(0);
+}
+let gsElectrons=[];
+let gsElectronPositions=new Float32Array(0);
+
+function gsElectronShells(z) {
+ // Distribuição didática por camadas para os elementos comuns catalogados.
+ const known={
+ 1:[1],2:[2],3:[2,1],4:[2,2],5:[2,3],6:[2,4],7:[2,5],8:[2,6],
+ 9:[2,7],10:[2,8],11:[2,8,1],12:[2,8,2],13:[2,8,3],14:[2,8,4],
+ 15:[2,8,5],16:[2,8,6],17:[2,8,7],18:[2,8,8],19:[2,8,8,1],
+ 20:[2,8,8,2],26:[2,8,14,2],29:[2,8,18,1],30:[2,8,18,2],
+ 47:[2,8,18,18,1],79:[2,8,18,32,18,1],80:[2,8,18,32,18,2],
+ 82:[2,8,18,32,18,4],92:[2,8,18,32,21,9,2]
+ };
+ if(known[z]) return known[z];
+ const shells=[];
+ let left=z;
+ const capacities=[2,8,18,32,32,18,8];
+ for(const cap of capacities){if(left<=0)break;const amount=Math.min(left,cap);shells.push(amount);left-=amount;}
+ return shells;
+}
+
+function gsBuildAtom(element) {
+ gsDisposeAtom();
+ gsElement=element;
+ const shells=gsElectronShells(element.z);
+ gsElectrons=[];
+ shells.forEach((count,si)=>{
+   const radius=1.05+si*.48;
+   const tilt=.38+si*.47;
+   for(let e=0;e<count;e++){
+     gsElectrons.push({radius,tilt,angle:Math.PI*2*e/count+si*.29,speed:(si%2?-1:1)*(.7+si*.12)});
+   }
+ });
+ gsElectronPositions=new Float32Array(gsElectrons.length*3);
+ mainRenderer.buildAtom(element,shells);
+ state.textContent='Repouso atômico · '+element.n+' · '+element.z+' prótons · '+Math.max(0,element.a-element.z)+' nêutrons · '+element.z+' elétrons';
+}
+
+function gsEnterRest() {
+ if(gsIsResting) return;
+ gsIsResting=true;
+ gsPeriodicMode=true;
+ mainRenderer.setAtomVisible(false);
+ gsBuildPeriodicLabels();
+ buildTargets();
+ state.textContent='Repouso periódico · 118 elementos · enxame coletivo';
+}
+
+function gsWake() {
+ gsLastTouch=performance.now();
+ if(gsIdleTimer!==null) clearTimeout(gsIdleTimer);
+ gsIdleTimer=null;
+ if(gsIsResting) {
+   gsIsResting=false;
+   gsPeriodicMode=false;
+   mainRenderer.setAtomVisible(false);
+   if(gsPeriodicLabels)mainRenderer.setPeriodicVisible(false);
+   buildTargets();
+   state.textContent='Enxame ativo';
+ }
+ if(shape==='face')return;
+ if(new URLSearchParams(location.search).get('demo')!=='1'){
+   gsIdleTimer=setTimeout(gsEnterRest,12000);
+ }
+}
+
+function gsChooseElement(command) {
+ const raw=String(command||'');
+ const q=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const availableElements=gsPeriodicElements.length===118
+   ? gsPeriodicElements.map(e=>({s:e.s,n:e.n,z:e.z,a:e.a}))
+   : gsElements;
+ const atomicNumberMatch=q.match(/\b(?:z\s*=?\s*)(\d{1,3})\b/);
+ let found=atomicNumberMatch?availableElements.find(e=>e.z===Number(atomicNumberMatch[1])):null;
+ if(!found){
+   found=availableElements.find(e=>{
+     const name=e.n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+     return new RegExp(`\\b${name}\\b`).test(q);
+   });
+ }
+ if(!found){
+   const symbols=raw.match(/\b[A-Z][a-z]?\b/g)||[];
+   found=availableElements.find(e=>symbols.includes(e.s));
+ }
+ if(found){
+   gsElement=found;
+   gsFocusElement(found.z);
+ }
+}
+
+document.addEventListener('pointerdown',gsWake,{passive:true});
+document.addEventListener('keydown',gsWake);
+document.addEventListener('input',gsWake,{passive:true});
+
+gsWake();
+// FIM GRID_SOUL_ATOMIC_REST_V2
+
+function animate(){
+ requestAnimationFrame(animate);
+ phase+=.012*(.25+energy);
+ if(gsIsResting){
+   const now=performance.now();
+   const dt=Math.min(.05,(now-(window.__gsAtomFrame||now))/1000);
+   window.__gsAtomFrame=now;
+   mainRenderer.rotateAtom(dt*.12);
+   for(let i=0;i<gsElectrons.length;i++){
+     const e=gsElectrons[i];
+     e.angle+=dt*e.speed;
+     atomPointScratch.set(Math.cos(e.angle)*e.radius,Math.sin(e.angle)*e.radius*.72,Math.sin(e.angle*1.7)*e.radius*.22);
+     atomRotationScratch.set(e.tilt,e.tilt*.37,e.tilt*.61);
+     atomPointScratch.applyEuler(atomRotationScratch);
+     const offset=i*3;
+     gsElectronPositions[offset]=atomPointScratch.x;
+     gsElectronPositions[offset+1]=atomPointScratch.y;
+     gsElectronPositions[offset+2]=atomPointScratch.z;
+   }
+   mainRenderer.updateElectrons(gsElectronPositions);
+ }
+
+ const cohesion=shape==='face'?.10:.012;
+ const flowStrength=(shape==='face'?.00025:.0045)*(.25+energy);
+ const damping=shape==='face'?.90:.94;
+ const maxSpeed=shape==='face'?.22:.035;
+ const zoomScale=THREE.MathUtils.clamp(19/mainRenderer.getCameraDistance(),.8,4.8);
+ const orbitalStart=active-faceOrbitCount(active);
+ const facialCubeScale=shape==='face'?(faceProfile?.geometry?.grid?.size||.025)/.055:1;
+ const facialMotionEnabled=shape==='face'&&referenceFaceAtlas&&!gsPeriodicMode&&faceAnimationRegions?.population===active;
+ const faceElapsedMs=performance.now()-faceAnimationStartedAt;
+ const eyeBlink=facialMotionEnabled?gridSoulEyeBlinkAmount(faceElapsedMs):0;
+ const mouthTalk=facialMotionEnabled?gridSoulTalkAmount(faceElapsedMs):0;
+ const eyeCenterY=(.5-GRID_SOUL_FACE_EYE_CENTER_V)*GRID_SOUL_REFERENCE_FACE_FRAME*scale;
+ const mouthCenterY=(.5-GRID_SOUL_FACE_MOUTH_CENTER_V)*GRID_SOUL_REFERENCE_FACE_FRAME*scale;
+ const plan=mainRenderer.beginFrame(active);
+ const simulationStarted=performance.now();
+ for(let slot=0;slot<plan.count;slot++){
+   const i=plan.sourceIndex(slot);
+   const offset=i*3;
+   let px=current[offset],py=current[offset+1],pz=current[offset+2];
+   let vx=velocity[offset],vy=velocity[offset+1],vz=velocity[offset+2];
+   const tx=target[offset],ty=target[offset+1],tz=target[offset+2];
+   if(shape==='face'&&referenceFaceAtlas){
+     px+=(tx-px)*.5; py+=(ty-py)*.5; pz+=(tz-pz)*.5;
+     vx=vy=vz=0;
+   }else{
+     const fx=Math.sin(phase*.73+py*.8+i*.001)*flowStrength;
+     const fy=Math.sin(phase*.61+pz*.8+i*.0013)*flowStrength;
+     const fz=Math.sin(phase*.83+px*.8+i*.0007)*flowStrength;
+     vx=(vx+(tx-px)*cohesion+fx)*damping;
+     vy=(vy+(ty-py)*cohesion+fy)*damping;
+     vz=(vz+(tz-pz)*cohesion+fz)*damping;
+     const speed=Math.sqrt(vx*vx+vy*vy+vz*vz);
+     if(speed>maxSpeed){const factor=maxSpeed/speed;vx*=factor;vy*=factor;vz*=factor;}
+     px+=vx;py+=vy;pz+=vz;
+   }
+   current[offset]=px;current[offset+1]=py;current[offset+2]=pz;
+   velocity[offset]=vx;velocity[offset+1]=vy;velocity[offset+2]=vz;
+   let x=px,y=py;
+   const z=pz;
+   let eyeScaleY=1;
+   if(facialMotionEnabled){
+     const eyeWeight=faceAnimationRegions.eyeWeights[i]*eyeBlink;
+     if(eyeWeight>0){y=eyeCenterY+(y-eyeCenterY)*(1-eyeWeight*.94);eyeScaleY=1-eyeWeight*.9;}
+     const mouthWeight=faceAnimationRegions.mouthWeights[i];
+     if(mouthWeight>0){const opening=(.002+.014*mouthTalk)*scale*mouthWeight;y+=faceAnimationRegions.mouthSides[i]*opening;x*=1-.035*mouthTalk*mouthWeight;}
+   }
+   dummy.position.set(x,y,z);
+   dummy.position.applyEuler(rotation);
+   dummy.position.add(move);
+   const isOrbital=shape==='face'&&faceProfile?.particles?.enabled&&i>=orbitalStart;
+   const variation=isOrbital?faceProfile.particles.sizeVariation:0;
+   const orbitalScale=isOrbital?(1-variation*.5+variation*rand(i,147)):1;
+   const cubeScale=cubeSize*(faceProfile&&shape==='face'?facialCubeScale:zoomScale)*orbitalScale;
+   mainRenderer.writeTransform(slot,dummy.position.x,dummy.position.y,dummy.position.z,cubeScale,cubeScale*eyeScaleY,cubeScale);
+ }
+ const simulationMs=performance.now()-simulationStarted;
+ mainRenderer.endFrame(active,simulationMs);
+}
+
+animate();
+state.textContent='Babylon.js operacional · recuperando memória persistente...';
+(async function restoreMemory(){
+ if(new URLSearchParams(location.search).get('demo')==='1'){
+   openShowcase();
+   return;
+ }
+ try{
+   const response=await fetch('/api/memory');
+   if(!response.ok)throw new Error('Memória indisponível');
+   const saved=await response.json();
+   if(saved.lastPlan && typeof saved.lastPlan==='object'){
+     document.querySelector('#command').value=saved.lastCommand||'';
+     await applyPlan(saved.lastPlan);
+     state.textContent=`Memória recuperada · forma: ${shape} · ${active.toLocaleString('pt-BR')} microcubos`;
+   }else{
+     openShowcase(true);
+   }
+ }catch(error){
+   openShowcase(true);
+ }
+})();
+
+// GRID_SOUL_PERIODIC_CLICK_V2
+stage.addEventListener('pointerdown',function(event){
+  if(!gsIsResting||!gsPeriodicMode||!gsPeriodicLabels)return;
+  const element=mainRenderer.pickPeriodicElement(event.clientX,event.clientY);
+  if(!element)return;
+  event.preventDefault();event.stopPropagation();
+  gsElement=gsPeriodicElements.find(e=>e.z===element.z)||element;
+  gsFocusElement(element.z);
+  gsBuildAtom(gsElement);
+  const p=gsPeriodicPosition(element);
+  mainRenderer.setAtomVisible(true);
+  mainRenderer.setAtomPosition(p.x,p.y,.35,.65);
+  mainRenderer.setTarget({x:p.x,y:p.y,z:0});
+  mainRenderer.setCamera({x:p.x,y:p.y+.6,z:5.5},{x:p.x,y:p.y,z:0});
+  state.textContent=`Elemento selecionado: ${element.s} · ${element.n} · Z=${element.z}`;
+},{capture:true});
+
+
+</script>
+<script type="module" src="/automation-ui.js"></script>
+<script type="module" src="/engineering-ui.js"></script>
+<script type="module" src="/vision-ui.js"></script>
+</body>
+</html>

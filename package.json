@@ -1,0 +1,34 @@
+{
+  "name": "gridsoul-evolution",
+  "version": "1.5.0",
+  "description": "Enxame 3D Babylon.js de microcubos com identidade química, oficina paramétrica e visão computacional local",
+  "main": "server.js",
+  "scripts": {
+    "test": "node --test",
+    "test:vision": ".venv/bin/python -m unittest discover -s test/vision -v",
+    "check": "node --check server.js && node --check chrome-extension/background.js && node --check chrome-extension/content.js && node --check components/material_catalog.js && node --check lib/automation/policy.js && node --check lib/automation/store.js && node --check lib/automation/network-proxy.js && node --check lib/automation/service.js && node --check lib/engineering/assistant.js && node --check lib/vision/service.js && node --check public/engineering/fork.js && node --check public/engineering-ui.js && node --check public/vision-ui.js && node --check public/automation-ui.js && node --check public/babylon-stage.js && node --check public/babylon-plan-adapter.js && node --test",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "babylonjs",
+    "threejs",
+    "chemistry",
+    "periodic-table",
+    "microcubes",
+    "computer-vision",
+    "image-reconstruction"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@babylonjs/core": "9.32.0",
+    "@google/genai": "^2.30.0",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "playwright": "^1.64.1",
+    "three": "0.180.0"
+  }
+}

@@ -1,0 +1,4 @@
+# Visão computacional local do GRID SOUL; não envia imagens a serviços externos.
+numpy>=1.26,<2.6
+Pillow>=10,<13
+opencv-python-headless>=4.10,<5
