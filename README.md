@@ -1,3 +1,5 @@
+<img width="1333" height="764" alt="image" src="https://github.com/user-attachments/assets/c1aa3529-2727-45cd-ade6-586ab9c82f40" />
+
 # GRID SOUL — Rosto de referência em cubos
 
 **O ChatGPT planeja; no rosto, somente instâncias cúbicas formam a imagem.**
